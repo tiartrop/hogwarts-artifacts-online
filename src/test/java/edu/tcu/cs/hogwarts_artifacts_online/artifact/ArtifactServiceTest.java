@@ -43,8 +43,7 @@ class ArtifactServiceTest {
     Artifact a1 = new Artifact();
     a1.setId("1250808601744904191");
     a1.setName("Deluminator");
-    a1.setDescription(
-        "A Deluminator is a device invented by Albus Dumbledore that resembles a cigarette lighter. It is used to remove or absorb (as well as return) the light from any light source to provide cover to the user.");
+    a1.setDescription("A Deluminator is a device invented by Albus Dumbledore that resembles a cigarette lighter. It is used to remove or absorb (as well as return) the light from any light source to provide cover to the user.");
     a1.setImageUrl("ImageUrl");
 
     Artifact a2 = new Artifact();
