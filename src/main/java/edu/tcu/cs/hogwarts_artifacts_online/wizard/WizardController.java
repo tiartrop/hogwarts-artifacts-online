@@ -20,7 +20,7 @@ import edu.tcu.cs.hogwarts_artifacts_online.wizard.dto.WizardDto;
 import jakarta.validation.Valid;
 
 @RestController
-@RequestMapping("/api/v1/wizards")
+@RequestMapping("${api.endpoint.base-url}/wizards")
 public class WizardController {
 
   private final WizardService wizardService;

@@ -21,7 +21,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 
 import edu.tcu.cs.hogwarts_artifacts_online.artifact.Artifact;
-import edu.tcu.cs.hogwarts_artifacts_online.artifact.utils.IdWorker;
+import edu.tcu.cs.hogwarts_artifacts_online.system.exception.ObjectNotFoundException;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -29,9 +29,6 @@ public class WizardServiceTest {
 
   @Mock
   WizardRepository wizardRepository;
-
-  @Mock
-  IdWorker idWorker;
 
   @InjectMocks
   WizardService wizardService;
@@ -84,44 +81,44 @@ public class WizardServiceTest {
     w.addArtifact(a1);
     w.addArtifact(a2);
 
-    given(wizardRepository.findById(1)).willReturn(Optional.of(w));
+    given(this.wizardRepository.findById(1)).willReturn(Optional.of(w));
 
     // When
-    Wizard returnedWizard = wizardService.findById(1);
+    Wizard returnedWizard = this.wizardService.findById(1);
 
     // Then
     assertThat(returnedWizard.getId()).isEqualTo(w.getId());
     assertThat(returnedWizard.getName()).isEqualTo(w.getName());
     assertThat(returnedWizard.getNumberOfArtifacts()).isEqualTo(2);
     assertThat(returnedWizard.getArtifacts().get(0)).isEqualTo(a1);
-    verify(wizardRepository, times(1)).findById(1);
+    verify(this.wizardRepository, times(1)).findById(1);
   }
 
   @Test
   void testFindByIdNotFound() {
     // Given
-    given(wizardRepository.findById(Mockito.any(Integer.class))).willReturn(Optional.empty());
+    given(this.wizardRepository.findById(Mockito.any(Integer.class))).willReturn(Optional.empty());
 
     // When
-    assertThrows(WizardNotFoundException.class, () -> {
-      wizardService.findById(1);
+    assertThrows(ObjectNotFoundException.class, () -> {
+      this.wizardService.findById(1);
     });
 
     // Then
-    verify(wizardRepository, times(1)).findById(1);
+    verify(this.wizardRepository, times(1)).findById(1);
   }
 
   @Test
   void testFindAllSuccess() {
     // Given
-    given(wizardRepository.findAll()).willReturn(this.wizards);
+    given(this.wizardRepository.findAll()).willReturn(this.wizards);
 
     // When
-    List<Wizard> actualWizards = wizardService.findAll();
+    List<Wizard> actualWizards = this.wizardService.findAll();
 
     // Then
     assertThat(actualWizards.size()).isEqualTo(this.wizards.size());
-    verify(wizardRepository, times(1)).findAll();
+    verify(this.wizardRepository, times(1)).findAll();
   }
 
   @Test
@@ -130,15 +127,14 @@ public class WizardServiceTest {
     Wizard newWizard = new Wizard();
     newWizard.setName("Hermione Granger");
 
-    given(wizardRepository.save(newWizard)).willReturn(newWizard);
+    given(this.wizardRepository.save(newWizard)).willReturn(newWizard);
 
     // When
-    Wizard savedWizard = wizardService.save(newWizard);
+    Wizard savedWizard = this.wizardService.save(newWizard);
 
     // Then
-    // assertThat(savedWizard.getId()).isEqualTo(4);
-    assertThat(savedWizard.getName()).isEqualTo("Hermione Granger");
-    verify(wizardRepository, times(1)).save(newWizard);
+    assertThat(savedWizard.getName()).isEqualTo(newWizard.getName());
+    verify(this.wizardRepository, times(1)).save(newWizard);
   }
 
   @Test
@@ -149,20 +145,19 @@ public class WizardServiceTest {
     oldWizard.setName("Harry Potter");
 
     Wizard update = new Wizard();
-    update.setId(2);
     update.setName("Harry Potter-update");
 
-    given(wizardRepository.findById(2)).willReturn(Optional.of(oldWizard));
-    given(wizardRepository.save(oldWizard)).willReturn(update);
+    given(this.wizardRepository.findById(2)).willReturn(Optional.of(oldWizard));
+    given(this.wizardRepository.save(oldWizard)).willReturn(oldWizard);
 
     // When
-    Wizard updatedWizard = wizardService.update(2, update);
+    Wizard updatedWizard = this.wizardService.update(2, update);
 
     // Then
-    assertThat(updatedWizard.getId()).isEqualTo(update.getId());
+    assertThat(updatedWizard.getId()).isEqualTo(2);
     assertThat(updatedWizard.getName()).isEqualTo(update.getName());
-    verify(wizardRepository, times(1)).findById(2);
-    verify(wizardRepository, times(1)).save(oldWizard);
+    verify(this.wizardRepository, times(1)).findById(2);
+    verify(this.wizardRepository, times(1)).save(oldWizard);
   }
 
   @Test
@@ -171,15 +166,15 @@ public class WizardServiceTest {
     Wizard update = new Wizard();
     update.setName("Harry Potter-update");
 
-    given(wizardRepository.findById(2)).willReturn(Optional.empty());
+    given(this.wizardRepository.findById(2)).willReturn(Optional.empty());
 
     // When
-    assertThrows(WizardNotFoundException.class, () -> {
-      wizardService.update(2, update);
+    assertThrows(ObjectNotFoundException.class, () -> {
+      this.wizardService.update(2, update);
     });
 
     // Then
-    verify(wizardRepository, times(1)).findById(2);
+    verify(this.wizardRepository, times(1)).findById(2);
   }
 
   @Test
@@ -188,27 +183,27 @@ public class WizardServiceTest {
     wizard.setId(1);
     wizard.setName("Albus Dumbledore");
 
-    given(wizardRepository.findById(1)).willReturn(Optional.of(wizard));
-    doNothing().when(wizardRepository).deleteById(1);
+    given(this.wizardRepository.findById(1)).willReturn(Optional.of(wizard));
+    doNothing().when(this.wizardRepository).deleteById(1);
 
     // When
-    wizardService.delete(1);
+    this.wizardService.delete(1);
 
     // Then
-    verify(wizardRepository, times(1)).deleteById(1);
+    verify(this.wizardRepository, times(1)).deleteById(1);
   }
 
   @Test
   void testDeleteNotFound() {
-    given(wizardRepository.findById(1)).willReturn(Optional.empty());
+    given(this.wizardRepository.findById(1)).willReturn(Optional.empty());
 
     // When
-    assertThrows(WizardNotFoundException.class, () -> {
-      wizardService.delete(1);
+    assertThrows(ObjectNotFoundException.class, () -> {
+      this.wizardService.delete(1);
     });
 
     // Then
-    verify(wizardRepository, times(1)).findById(1);
+    verify(this.wizardRepository, times(1)).findById(1);
   }
 
 }

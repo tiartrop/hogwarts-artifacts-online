@@ -25,8 +25,7 @@ public class DBDataInitializer implements CommandLineRunner {
     Artifact a1 = new Artifact();
     a1.setId("1250808601744904191");
     a1.setName("Deluminator");
-    a1.setDescription(
-        "A Deluminator is a device invented by Albus Dumbledore that resembles a cigarette lighter. It is used to remove or absorb (as well as return) the light from any light source to provide cover to the user.");
+    a1.setDescription("A Deluminator is a device invented by Albus Dumbledore that resembles a cigarette lighter. It is used to remove or absorb (as well as return) the light from any light source to provide cover to the user.");
     a1.setImageUrl("ImageUrl");
 
     Artifact a2 = new Artifact();
@@ -61,19 +60,16 @@ public class DBDataInitializer implements CommandLineRunner {
     a6.setImageUrl("ImageUrl");
 
     Wizard w1 = new Wizard();
-    w1.setId(1);
     w1.setName("Albus Dumbledore");
     w1.addArtifact(a1);
     w1.addArtifact(a3);
 
     Wizard w2 = new Wizard();
-    w2.setId(2);
     w2.setName("Harry Potter");
     w2.addArtifact(a2);
     w2.addArtifact(a4);
 
     Wizard w3 = new Wizard();
-    w3.setId(3);
     w3.setName("Neville Longbottom");
     w3.addArtifact(a5);
 
