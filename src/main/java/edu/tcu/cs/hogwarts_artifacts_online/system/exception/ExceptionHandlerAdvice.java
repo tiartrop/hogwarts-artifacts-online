@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import edu.tcu.cs.hogwarts_artifacts_online.artifact.ArtifactNotFoundException;
 import edu.tcu.cs.hogwarts_artifacts_online.system.Result;
 import edu.tcu.cs.hogwarts_artifacts_online.system.StatusCode;
+import edu.tcu.cs.hogwarts_artifacts_online.wizard.WizardNotFoundException;
 
 @RestControllerAdvice
 public class ExceptionHandlerAdvice {
@@ -22,6 +23,12 @@ public class ExceptionHandlerAdvice {
   @ExceptionHandler(ArtifactNotFoundException.class)
   @ResponseStatus(HttpStatus.NOT_FOUND)
   Result handlerArtifactNotFoundException(ArtifactNotFoundException ex) {
+    return new Result(false, StatusCode.NOT_FOUND, ex.getMessage());
+  }
+
+  @ExceptionHandler(WizardNotFoundException.class)
+  @ResponseStatus(HttpStatus.NOT_FOUND)
+  Result handlerWizardNotFoundException(WizardNotFoundException ex) {
     return new Result(false, StatusCode.NOT_FOUND, ex.getMessage());
   }
 

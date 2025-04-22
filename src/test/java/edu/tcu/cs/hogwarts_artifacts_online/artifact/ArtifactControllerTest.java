@@ -90,7 +90,6 @@ public class ArtifactControllerTest {
     a6.setDescription("The Resurrection Stone allows the holder to bring back deceased loved ones, in a semi-physical form, and communicate with them.");
     a6.setImageUrl("ImageUrl");
     this.artifacts.add(a6);
-
   }
 
   @AfterEach
@@ -167,7 +166,8 @@ public class ArtifactControllerTest {
         .andExpect(jsonPath("$.message").value("Add Success"))
         .andExpect(jsonPath("$.data.id").isNotEmpty())
         .andExpect(jsonPath("$.data.name").value(savedArtifact.getName()))
-        .andExpect(jsonPath("$.data.description").value(savedArtifact.getDescription())).andExpect(jsonPath("$.data.imageUrl").value(savedArtifact.getImageUrl()));
+        .andExpect(jsonPath("$.data.description").value(savedArtifact.getDescription()))
+        .andExpect(jsonPath("$.data.imageUrl").value(savedArtifact.getImageUrl()));
   }
 
   @Test
