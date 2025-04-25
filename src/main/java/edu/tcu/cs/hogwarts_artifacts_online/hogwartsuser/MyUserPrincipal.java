@@ -18,7 +18,7 @@ public class MyUserPrincipal implements UserDetails {
 
   @Override
   public Collection<? extends GrantedAuthority> getAuthorities() {
-    return Arrays.stream(StringUtils.tokenizeToStringArray(this.hogwartsUser.getRoles(), " ")).map(role -> new SimpleGrantedAuthority("ROLE " + role)).toList();
+    return Arrays.stream(StringUtils.tokenizeToStringArray(this.hogwartsUser.getRoles(), " ")).map(role -> new SimpleGrantedAuthority("ROLE_" + role)).toList();
   }
 
   @Override
