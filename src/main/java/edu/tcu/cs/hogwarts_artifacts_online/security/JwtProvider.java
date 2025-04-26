@@ -25,8 +25,7 @@ public class JwtProvider {
     long expiresIn = 2; // 2 hours
 
     // Prepare a chaim called authorities.
-    String authorities = authentication.getAuthorities().stream().map(grantedAuthority -> grantedAuthority.getAuthority())
-                                            .collect(Collectors.joining(" ")); // Must be space-delimited.
+    String authorities = authentication.getAuthorities().stream().map(grantedAuthority -> grantedAuthority.getAuthority()).collect(Collectors.joining(" ")); // Must be space-delimited.
 
     JwtClaimsSet claims = JwtClaimsSet.builder()
                 .issuer("self")

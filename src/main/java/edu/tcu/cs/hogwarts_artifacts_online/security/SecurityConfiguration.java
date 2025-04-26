@@ -41,7 +41,17 @@ public class SecurityConfiguration {
   @Value("${api.endpoint.base-url}")
   private String baseUrl;
 
-  public SecurityConfiguration() throws NoSuchAlgorithmException {
+  private CustomBasicAuthenticationEntryPoint customBasicAuthenticationEntryPoint;
+
+  private CustomBearerTokenAuthenticationEntryPoint customBearerTokenAuthenticationEntryPoint;
+
+  private CustomBearerTokenAccessDeniedHandler customBearerTokenAccessDeniedHandler;
+
+  public SecurityConfiguration(CustomBasicAuthenticationEntryPoint customBasicAuthenticationEntryPoint, CustomBearerTokenAuthenticationEntryPoint customBearerTokenAuthenticationEntryPoint, CustomBearerTokenAccessDeniedHandler customBearerTokenAccessDeniedHandler) throws NoSuchAlgorithmException {
+    this.customBasicAuthenticationEntryPoint = customBasicAuthenticationEntryPoint;
+    this.customBearerTokenAuthenticationEntryPoint = customBearerTokenAuthenticationEntryPoint;
+    this.customBearerTokenAccessDeniedHandler = customBearerTokenAccessDeniedHandler;
+
     // Generate a public/private key pair.
     KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance("RSA");
     keyPairGenerator.initialize(2048); // The generated key will have a size of 2048 bits.
@@ -65,8 +75,11 @@ public class SecurityConfiguration {
             )
             .headers(headers -> headers.frameOptions(frameOptions -> frameOptions.sameOrigin())) // This is for H2 browser console access.
             .csrf(csrf -> csrf.disable())
-            .httpBasic(Customizer.withDefaults())
-            .oauth2ResourceServer((oauth2) -> oauth2.jwt(Customizer.withDefaults()))
+            .httpBasic(httpBasic -> httpBasic.authenticationEntryPoint(this.customBasicAuthenticationEntryPoint))
+            .oauth2ResourceServer((oauth2) -> {
+              oauth2.jwt(Customizer.withDefaults());
+              oauth2.authenticationEntryPoint(this.customBearerTokenAuthenticationEntryPoint).accessDeniedHandler(this.customBearerTokenAccessDeniedHandler);
+            })
             .sessionManagement(sessionManagement -> sessionManagement.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .build();
   }
