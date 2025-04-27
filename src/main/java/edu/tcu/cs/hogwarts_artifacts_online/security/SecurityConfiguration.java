@@ -75,6 +75,7 @@ public class SecurityConfiguration {
             )
             .headers(headers -> headers.frameOptions(frameOptions -> frameOptions.sameOrigin())) // This is for H2 browser console access.
             .csrf(csrf -> csrf.disable())
+            .cors(Customizer.withDefaults())
             .httpBasic(httpBasic -> httpBasic.authenticationEntryPoint(this.customBasicAuthenticationEntryPoint))
             .oauth2ResourceServer((oauth2) -> {
               oauth2.jwt(Customizer.withDefaults());
