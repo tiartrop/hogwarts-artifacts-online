@@ -66,7 +66,7 @@ public class SecurityConfiguration {
             .authorizeHttpRequests(authorizeHttpRequests -> authorizeHttpRequests
               .requestMatchers(HttpMethod.GET, this.baseUrl + "/artifacts/**").permitAll()
               .requestMatchers(HttpMethod.GET, this.baseUrl + "/users/**").hasAnyAuthority("ROLE_admin")
-              .requestMatchers(HttpMethod.POST, this.baseUrl + "/users/").hasAnyAuthority("ROLE_admin")
+              .requestMatchers(HttpMethod.POST, this.baseUrl + "/users").hasAnyAuthority("ROLE_admin")
               .requestMatchers(HttpMethod.PUT, this.baseUrl + "/users/**").hasAnyAuthority("ROLE_admin")
               .requestMatchers(HttpMethod.DELETE, this.baseUrl + "/users/**").hasAnyAuthority("ROLE_admin")
               .requestMatchers(AntPathRequestMatcher.antMatcher("/h2-console/**")).permitAll()

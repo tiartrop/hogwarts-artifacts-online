@@ -33,7 +33,7 @@ import edu.tcu.cs.hogwarts_artifacts_online.system.exception.ObjectNotFoundExcep
 import edu.tcu.cs.hogwarts_artifacts_online.wizard.dto.WizardDto;
 
 @SpringBootTest
-@AutoConfigureMockMvc
+@AutoConfigureMockMvc(addFilters = false)
 public class WizardControllerTest {
 
   @Autowired
