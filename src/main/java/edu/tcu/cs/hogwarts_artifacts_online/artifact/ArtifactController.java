@@ -17,6 +17,7 @@ import edu.tcu.cs.hogwarts_artifacts_online.artifact.converter.ArtifactToArtifac
 import edu.tcu.cs.hogwarts_artifacts_online.artifact.dto.ArtifactDto;
 import edu.tcu.cs.hogwarts_artifacts_online.system.Result;
 import edu.tcu.cs.hogwarts_artifacts_online.system.StatusCode;
+import io.micrometer.core.instrument.MeterRegistry;
 import jakarta.validation.Valid;
 
 @RestController
@@ -28,17 +29,22 @@ public class ArtifactController {
   private final ArtifactToArtifactDtoConverter artifactToArtifactDtoConverter;
   private final ArtifactDtoToArtifactConverter artifactDtoToArtifactConverter;
 
+  private final MeterRegistry meterRegistry;
+
   public ArtifactController(ArtifactService artifactService,
                             ArtifactToArtifactDtoConverter artifactToArtifactDtoConverter,
-                            ArtifactDtoToArtifactConverter artifactDtoToArtifactConverter) {
+                            ArtifactDtoToArtifactConverter artifactDtoToArtifactConverter,
+                            MeterRegistry meterRegistry) {
     this.artifactService = artifactService;
     this.artifactToArtifactDtoConverter = artifactToArtifactDtoConverter;
     this.artifactDtoToArtifactConverter = artifactDtoToArtifactConverter;
+    this.meterRegistry = meterRegistry;
   }
 
   @GetMapping("/{artifactId}")
   public Result findArtifactById(@PathVariable String artifactId) {
     Artifact foundArtifact = this.artifactService.findById(artifactId);
+    meterRegistry.counter("artifact.id." + artifactId).increment();
     ArtifactDto artifactDto = this.artifactToArtifactDtoConverter.convert(foundArtifact);
     return new Result(true, StatusCode.SUCCESS, "Find One Success", artifactDto);
   }
