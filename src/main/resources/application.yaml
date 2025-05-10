@@ -38,6 +38,9 @@ management:
   observations:
     annotations:
       enabled: true
+  tracing:
+    sampling:
+      probability: 0.1
 info:
   app:
     name: hogwarts-artifacts-online
