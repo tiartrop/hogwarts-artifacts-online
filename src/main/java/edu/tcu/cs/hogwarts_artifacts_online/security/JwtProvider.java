@@ -13,7 +13,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class JwtProvider {
 
-  private JwtEncoder jwtEncoder;
+  private final JwtEncoder jwtEncoder;
 
 
   public JwtProvider(JwtEncoder jwtEncoder) {
