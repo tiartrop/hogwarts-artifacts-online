@@ -6,3 +6,7 @@ spring:
   jpa:
     hibernate:
       ddl-auto: none
+ai:
+  gemini:
+    endpoint: ${AI_GENINI_ENDPOINT:https://generativelanguage.googleapis.com/v1beta/openai/chat/completions} # environment variable with a default value
+    api-key: ${ai-gemini-api-key:your-genimi-api-key} # secret from Cloud Key Vault
