@@ -12,6 +12,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+
 import edu.tcu.cs.hogwarts_artifacts_online.artifact.converter.ArtifactDtoToArtifactConverter;
 import edu.tcu.cs.hogwarts_artifacts_online.artifact.converter.ArtifactToArtifactDtoConverter;
 import edu.tcu.cs.hogwarts_artifacts_online.artifact.dto.ArtifactDto;
@@ -74,6 +76,14 @@ public class ArtifactController {
   public Result deleteArtifact(@PathVariable String artifactId) {
     this.artifactService.delete(artifactId);
     return new Result(true, StatusCode.SUCCESS, "Delete Success");
+  }
+
+  @GetMapping("/summary")
+  public Result summarizeArtifacts() throws JsonProcessingException {
+    List<Artifact> foundArtifacts = this.artifactService.findAll();
+    List<ArtifactDto> artifactDtos = foundArtifacts.stream().map(this.artifactToArtifactDtoConverter::convert).collect(Collectors.toList());
+    String summarize = this.artifactService.summarize(artifactDtos);
+    return new Result(true, StatusCode.SUCCESS, "Summarize Success", summarize);
   }
 
 }

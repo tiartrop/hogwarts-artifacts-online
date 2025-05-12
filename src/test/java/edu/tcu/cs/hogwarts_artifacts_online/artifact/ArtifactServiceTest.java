@@ -22,9 +22,19 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.context.ActiveProfiles;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import edu.tcu.cs.hogwarts_artifacts_online.artifact.dto.ArtifactDto;
 import edu.tcu.cs.hogwarts_artifacts_online.artifact.utils.IdWorker;
+import edu.tcu.cs.hogwarts_artifacts_online.client.ai.chat.ChatClient;
+import edu.tcu.cs.hogwarts_artifacts_online.client.ai.chat.dto.ChatRequest;
+import edu.tcu.cs.hogwarts_artifacts_online.client.ai.chat.dto.ChatResponse;
+import edu.tcu.cs.hogwarts_artifacts_online.client.ai.chat.dto.Choice;
+import edu.tcu.cs.hogwarts_artifacts_online.client.ai.chat.dto.Message;
 import edu.tcu.cs.hogwarts_artifacts_online.system.exception.ObjectNotFoundException;
 import edu.tcu.cs.hogwarts_artifacts_online.wizard.Wizard;
+import edu.tcu.cs.hogwarts_artifacts_online.wizard.dto.WizardDto;
 
 @ExtendWith(MockitoExtension.class)
 @ActiveProfiles(value = "dev")
@@ -35,6 +45,9 @@ class ArtifactServiceTest {
 
   @Mock
   IdWorker idWorker;
+
+  @Mock
+  ChatClient chatClient;
 
   @InjectMocks
   ArtifactService artifactService;
@@ -215,6 +228,7 @@ class ArtifactServiceTest {
 
   @Test
   void testDeleteNotFound() {
+    // Given
     given(this.artifactRepository.findById("1250808601744904192")).willReturn(Optional.empty());
 
     // When
@@ -224,6 +238,35 @@ class ArtifactServiceTest {
 
     // Then
     verify(this.artifactRepository, times(1)).findById("1250808601744904192");
+  }
+
+  @Test
+  void testSummarizeSuccess() throws JsonProcessingException {
+    // Give
+    WizardDto wizardDto = new WizardDto(1, "Albus Dombledore", 2);
+    List<ArtifactDto> artifactDtos = List.of(
+      new ArtifactDto("1250808601744904191", "Deluminator", "A Deluminator is a device invented by Albus Dumbledore that resembles a cigarette lighter. It is used to remove or absorb (as well as return) the light from any light source to provide cover to the user.", "ImageUrl", wizardDto),
+      new ArtifactDto("1250808601744904193", "Elder Wand", "The Elder Wand, known throughout history as the Deathstick or the Wand of Destiny, is an extremely powerful wand made of elder wood with a core of Thestral tail hair.", "ImageUrl", wizardDto)
+    );
+
+    ObjectMapper objectMapper = new ObjectMapper();
+    String jsonArray = objectMapper.writeValueAsString(artifactDtos);
+
+    ChatRequest chatRequest = new ChatRequest("gemini-2.0-flash", List.of(
+      new Message("system", "Your task is to generate a short summary of a given JSON array in at most 100 words. The summary must include the number of artifacts, each artifact's description, and the ownership information. Don't mention that the summary is from a given JSON array."),
+      new Message("user", jsonArray)
+    ));
+
+    ChatResponse chatResponse = new ChatResponse(List.of(new Choice(0, new Message("assistant", "The summary includes two artifacts, owned by Albus Dombledore."))));
+
+    given(this.chatClient.generate(chatRequest)).willReturn(chatResponse);
+
+    // When
+    String summary = this.artifactService.summarize(artifactDtos);
+
+    // Then
+    assertThat(summary).isEqualTo("The summary includes two artifacts, owned by Albus Dombledore.");
+    verify(this.chatClient, times(1)).generate(chatRequest);
   }
 
 }

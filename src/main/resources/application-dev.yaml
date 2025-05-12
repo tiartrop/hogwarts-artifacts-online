@@ -5,3 +5,7 @@ spring:
     password:
   jpa:
     show-sql: true
+ai:
+  gemini:
+    endpoint: ${AI_GENINI_ENDPOINT:https://generativelanguage.googleapis.com/v1beta/openai/chat/completions} # environment variable with a default value.
+    api-key: ${AI_GENINI_API_KEY:YOUR_API_KEY} # environment variable with a default value
