@@ -8,6 +8,9 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.hamcrest.Matchers;
 import org.json.JSONObject;
 import org.junit.jupiter.api.BeforeEach;
@@ -24,6 +27,8 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.ResultActions;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -142,7 +147,7 @@ public class ArtifactControllerIntergrationTest {
 
   @Test
   void testDeleteArtifactSuccess() throws Exception {
-    this.mockMvc.perform(delete(this.baseUrl + "/artifacts/1250808601744904194").header("Authorization", this.token).accept(MediaType.APPLICATION_JSON))
+    this.mockMvc.perform(delete(this.baseUrl + "/artifacts/1250808601744904193").header("Authorization", this.token).accept(MediaType.APPLICATION_JSON))
         .andExpect(jsonPath("$.flag").value(true))
         .andExpect(jsonPath("$.code").value(StatusCode.SUCCESS))
         .andExpect(jsonPath("$.message").value("Delete Success"))
@@ -156,6 +161,49 @@ public class ArtifactControllerIntergrationTest {
         .andExpect(jsonPath("$.code").value(StatusCode.NOT_FOUND))
         .andExpect(jsonPath("$.message").value("Could not find artifact with Id 1250808601744904199 :("))
         .andExpect(jsonPath("$.data").isEmpty());
+  }
+
+
+  @Test
+  void testFindArtifactByDescription() throws Exception {
+    // Given
+    Map<String, String> searchCriteria = new HashMap<>();
+    searchCriteria.put("description", "Hogwarts");
+    String json = this.objectMapper.writeValueAsString(searchCriteria);
+
+    MultiValueMap<String, String> requestParams = new LinkedMultiValueMap<>();
+    requestParams.add("page", "0");
+    requestParams.add("size", "2");
+    requestParams.add("sort", "name,asc");
+
+    // When and then
+    this.mockMvc.perform(post(this.baseUrl + "/artifacts/search").contentType(MediaType.APPLICATION_JSON).content(json).params(requestParams).accept(MediaType.APPLICATION_JSON))
+        .andExpect(jsonPath("$.flag").value(true))
+        .andExpect(jsonPath("$.code").value(StatusCode.SUCCESS))
+        .andExpect(jsonPath("$.message").value("Search Success"))
+        .andExpect(jsonPath("$.data.content", Matchers.hasSize(2)));
+  }
+
+  @Test
+  @DirtiesContext(methodMode = DirtiesContext.MethodMode.BEFORE_METHOD)
+  void testFindArtifactByNameAndDescription() throws Exception {
+    // Given
+    Map<String, String> searchCriteria = new HashMap<>();
+    searchCriteria.put("name", "Sword");
+    searchCriteria.put("description", "Hogwarts");
+    String json = this.objectMapper.writeValueAsString(searchCriteria);
+
+    MultiValueMap<String, String> requestParams = new LinkedMultiValueMap<>();
+    requestParams.add("page", "0");
+    requestParams.add("size", "2");
+    requestParams.add("sort", "name,asc");
+
+    // When and then
+    this.mockMvc.perform(post(this.baseUrl + "/artifacts/search").contentType(MediaType.APPLICATION_JSON).content(json).params(requestParams).accept(MediaType.APPLICATION_JSON))
+        .andExpect(jsonPath("$.flag").value(true))
+        .andExpect(jsonPath("$.code").value(StatusCode.SUCCESS))
+        .andExpect(jsonPath("$.message").value("Search Success"))
+        .andExpect(jsonPath("$.data.content", Matchers.hasSize(1)));
   }
 
 }
