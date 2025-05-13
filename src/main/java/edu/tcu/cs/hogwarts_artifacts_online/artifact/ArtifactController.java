@@ -1,6 +1,7 @@
 package edu.tcu.cs.hogwarts_artifacts_online.artifact;
 
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.springframework.data.domain.Page;
@@ -56,8 +57,8 @@ public class ArtifactController {
   @GetMapping
   public Result findAllArtifacts(Pageable pageable) {
     Page<Artifact> artifactPage = this.artifactService.findAll(pageable);
-    Page<ArtifactDto> artifactDtosPage = artifactPage.map(this.artifactToArtifactDtoConverter::convert);
-    return new Result(true, StatusCode.SUCCESS, "Find All Success", artifactDtosPage);
+    Page<ArtifactDto> artifactDtoPage = artifactPage.map(this.artifactToArtifactDtoConverter::convert);
+    return new Result(true, StatusCode.SUCCESS, "Find All Success", artifactDtoPage);
   }
 
   @PostMapping
@@ -86,6 +87,14 @@ public class ArtifactController {
     List<ArtifactDto> artifactDtos = foundArtifacts.stream().map(this.artifactToArtifactDtoConverter::convert).collect(Collectors.toList());
     String summarize = this.artifactService.summarize(artifactDtos);
     return new Result(true, StatusCode.SUCCESS, "Summarize Success", summarize);
+  }
+
+  @PostMapping("/search")
+  public Result findArtifactsByCriteria(@RequestBody Map<String, String> searchCriteria, Pageable pageable) throws JsonProcessingException {
+    Page<Artifact> artifactPage = this.artifactService.findByCriteria(searchCriteria, pageable);
+    Page<ArtifactDto> artifactDtoPage = artifactPage.map(this.artifactToArtifactDtoConverter::convert);
+
+    return new Result(true, StatusCode.SUCCESS, "Search Success", artifactDtoPage);
   }
 
 }
