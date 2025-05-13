@@ -2,6 +2,8 @@ package edu.tcu.cs.hogwarts_artifacts_online.artifact;
 
 import java.util.List;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -42,6 +44,10 @@ public class ArtifactService {
   @Timed("findAllArtifactsService.time")
   public List<Artifact> findAll() {
     return this.artifactRepository.findAll();
+  }
+
+  public Page<Artifact> findAll(Pageable pageable) {
+    return this.artifactRepository.findAll(pageable);
   }
 
   public Artifact save(Artifact newArtifact) {
