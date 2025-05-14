@@ -117,6 +117,12 @@ public class ExceptionHandlerAdvice {
     return new ResponseEntity<Result>(new Result(false, ex.getStatusCode().value(), "A rest client error occurs, see data for details.", formattedExceptionMessage), ex.getStatusCode());
   }
 
+  @ExceptionHandler(CustomBlobStorageException.class)
+  @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+  Result handleCustomBlobStorageException(CustomBlobStorageException ex) {
+    return new Result(false, StatusCode.INTERNAL_SERVER_ERROR, ex.getMessage(), ex.getCause().getMessage());
+  }
+
   @ExceptionHandler(Exception.class)
   @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
   Result handlerOtherException(Exception ex) {

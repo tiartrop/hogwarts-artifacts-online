@@ -5,6 +5,15 @@ spring:
     password:
   jpa:
     show-sql: true
+  cloud:
+    azure:
+      storage:
+        account-name: ${AZURE_STORAGE_ACCOUNT_NAME:YOUR_ACCOUNT_NAME}
+        account-key: ${AZURE_STORAGE_ACCOUNT_KEY:YOUR_ACCOUNT_KEY}
+  servlet:
+    multipart:
+      max-file-size: 2MB
+      max-request-size: 20MB
 ai:
   gemini:
     endpoint: ${AI_GENINI_ENDPOINT:https://generativelanguage.googleapis.com/v1beta/openai/chat/completions} # environment variable with a default value.
