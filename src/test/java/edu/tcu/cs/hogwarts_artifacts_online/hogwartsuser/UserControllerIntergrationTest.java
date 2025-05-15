@@ -27,7 +27,6 @@ import org.springframework.test.web.servlet.ResultActions;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import edu.tcu.cs.hogwarts_artifacts_online.hogwartsuser.dto.UserDto;
 import edu.tcu.cs.hogwarts_artifacts_online.system.StatusCode;
 
 @SpringBootTest
@@ -84,7 +83,8 @@ public class UserControllerIntergrationTest {
   }
 
   @Test
-  void testFindUserByIdSuccess() throws Exception {
+  @DirtiesContext(methodMode = DirtiesContext.MethodMode.BEFORE_METHOD)
+  void testFindUserByIdWithAdminAccessingAnyUsersInfo() throws Exception {
     this.mockMvc.perform(get(this.baseUrl + "/users/2").header("Authorization", this.adminToken).accept(MediaType.APPLICATION_JSON))
         .andExpect(jsonPath("$.flag").value(true))
         .andExpect(jsonPath("$.code").value(StatusCode.SUCCESS))
@@ -94,8 +94,18 @@ public class UserControllerIntergrationTest {
   }
 
   @Test
-  void testFindUserByIdErrorWithNoAuthority() throws Exception {
+  void testFindUserByIdWithUserAccessingOwnInfo() throws Exception {
     this.mockMvc.perform(get(this.baseUrl + "/users/2").header("Authorization", this.normalToken).accept(MediaType.APPLICATION_JSON))
+        .andExpect(jsonPath("$.flag").value(true))
+        .andExpect(jsonPath("$.code").value(StatusCode.SUCCESS))
+        .andExpect(jsonPath("$.message").value("Find One Success"))
+        .andExpect(jsonPath("$.data.id").value(2))
+        .andExpect(jsonPath("$.data.username").value("eric"));
+  }
+
+  @Test
+  void testFindUserByIdWithUserAccessingAnotherUsersInfo() throws Exception {
+    this.mockMvc.perform(get(this.baseUrl + "/users/1").header("Authorization", this.normalToken).accept(MediaType.APPLICATION_JSON))
         .andExpect(jsonPath("$.flag").value(false))
         .andExpect(jsonPath("$.code").value(StatusCode.FORBIDDEN))
         .andExpect(jsonPath("$.message").value("No permission."))
@@ -156,10 +166,13 @@ public class UserControllerIntergrationTest {
   }
 
   @Test
-  void testUpdateUserSuccess() throws Exception {
-    UserDto userDto = new UserDto(3, "tom123", false, "user");
+  void testUpdateUserWithAdminUpdatingAnyUsersInfo() throws Exception {
+    HogwartsUser user = new HogwartsUser();
+    user.setUsername("tom123");
+    user.setEnabled(false);
+    user.setRoles("user");
 
-    String json = this.objectMapper.writeValueAsString(userDto);
+    String json = this.objectMapper.writeValueAsString(user);
 
     this.mockMvc.perform(put(this.baseUrl + "/users/3").header("Authorization", this.adminToken).contentType(MediaType.APPLICATION_JSON).content(json).accept(MediaType.APPLICATION_JSON))
         .andExpect(jsonPath("$.flag").value(true))
@@ -172,29 +185,54 @@ public class UserControllerIntergrationTest {
   }
 
   @Test
-  void testUpdateUserErrorWithNoAuthority() throws Exception {
-    UserDto userDto = new UserDto(3, "tom123", false, "user");
-
-    String json = this.objectMapper.writeValueAsString(userDto);
-
-    this.mockMvc.perform(put(this.baseUrl + "/users/3").header("Authorization", this.normalToken).contentType(MediaType.APPLICATION_JSON).content(json).accept(MediaType.APPLICATION_JSON))
-        .andExpect(jsonPath("$.flag").value(false))
-        .andExpect(jsonPath("$.code").value(StatusCode.FORBIDDEN))
-        .andExpect(jsonPath("$.message").value("No permission."))
-        .andExpect(jsonPath("$.data").value("Access Denied"));
-  }
-
-  @Test
   void testUpdateUserErrorWithNonExistentId() throws Exception {
-    UserDto userDto = new UserDto(5, "tom123", false, "user");
+    HogwartsUser user = new HogwartsUser();
+    user.setUsername("tom123");
+    user.setEnabled(false);
+    user.setRoles("user");
 
-    String json = this.objectMapper.writeValueAsString(userDto);
+    String json = this.objectMapper.writeValueAsString(user);
 
     this.mockMvc.perform(put(this.baseUrl + "/users/5").header("Authorization", this.adminToken).contentType(MediaType.APPLICATION_JSON).content(json).accept(MediaType.APPLICATION_JSON))
         .andExpect(jsonPath("$.flag").value(false))
         .andExpect(jsonPath("$.code").value(StatusCode.NOT_FOUND))
         .andExpect(jsonPath("$.message").value("Could not find user with Id 5 :("))
         .andExpect(jsonPath("$.data").isEmpty());
+  }
+
+  @Test
+  void testUpdateUserWithUserUpdatingOwnInfo() throws Exception {
+    HogwartsUser user = new HogwartsUser();
+    user.setUsername("eric123");
+    user.setEnabled(true);
+    user.setRoles("user");
+
+    String json = this.objectMapper.writeValueAsString(user);
+
+    this.mockMvc.perform(put(this.baseUrl + "/users/2").header("Authorization", this.normalToken).contentType(MediaType.APPLICATION_JSON).content(json).accept(MediaType.APPLICATION_JSON))
+        .andExpect(jsonPath("$.flag").value(true))
+        .andExpect(jsonPath("$.code").value(StatusCode.SUCCESS))
+        .andExpect(jsonPath("$.message").value("Update Success"))
+        .andExpect(jsonPath("$.data.id").value(2))
+        .andExpect(jsonPath("$.data.username").value("eric123"))
+        .andExpect(jsonPath("$.data.enabled").value(true))
+        .andExpect(jsonPath("$.data.roles").value("user"));
+  }
+
+  @Test
+  void testUpdateUserWithUserUpdatinAnotherUserInfo() throws Exception {
+    HogwartsUser user = new HogwartsUser();
+    user.setUsername("tom123");
+    user.setEnabled(true);
+    user.setRoles("user");
+
+    String json = this.objectMapper.writeValueAsString(user);
+
+    this.mockMvc.perform(put(this.baseUrl + "/users/3").header("Authorization", this.normalToken).contentType(MediaType.APPLICATION_JSON).content(json).accept(MediaType.APPLICATION_JSON))
+        .andExpect(jsonPath("$.flag").value(false))
+        .andExpect(jsonPath("$.code").value(StatusCode.FORBIDDEN))
+        .andExpect(jsonPath("$.message").value("No permission."))
+        .andExpect(jsonPath("$.data").value("Access Denied"));
   }
 
   @Test

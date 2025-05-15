@@ -10,6 +10,8 @@ import org.springframework.security.oauth2.jwt.JwtEncoder;
 import org.springframework.security.oauth2.jwt.JwtEncoderParameters;
 import org.springframework.stereotype.Component;
 
+import edu.tcu.cs.hogwarts_artifacts_online.hogwartsuser.MyUserPrincipal;
+
 @Component
 public class JwtProvider {
 
@@ -32,6 +34,7 @@ public class JwtProvider {
                 .issuedAt(now)
                 .expiresAt(now.plus(expiresIn, ChronoUnit.HOURS))
                 .subject(authentication.getName())
+                .claim("userId", ((MyUserPrincipal)(authentication.getPrincipal())).getHogwartsUser().getId())
                 .claim("authorities", authorities)
                 .build();
 

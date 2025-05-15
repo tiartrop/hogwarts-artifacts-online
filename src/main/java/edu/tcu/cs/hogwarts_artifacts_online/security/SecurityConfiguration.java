@@ -48,10 +48,16 @@ public class SecurityConfiguration {
 
   private CustomBearerTokenAccessDeniedHandler customBearerTokenAccessDeniedHandler;
 
-  public SecurityConfiguration(CustomBasicAuthenticationEntryPoint customBasicAuthenticationEntryPoint, CustomBearerTokenAuthenticationEntryPoint customBearerTokenAuthenticationEntryPoint, CustomBearerTokenAccessDeniedHandler customBearerTokenAccessDeniedHandler) throws NoSuchAlgorithmException {
+  private final UserRequestAuthorizationManager userRequestAuthorizationManager;
+
+  public SecurityConfiguration(CustomBasicAuthenticationEntryPoint customBasicAuthenticationEntryPoint,
+                              CustomBearerTokenAuthenticationEntryPoint customBearerTokenAuthenticationEntryPoint,
+                              CustomBearerTokenAccessDeniedHandler customBearerTokenAccessDeniedHandler,
+                              UserRequestAuthorizationManager userRequestAuthorizationManager) throws NoSuchAlgorithmException {
     this.customBasicAuthenticationEntryPoint = customBasicAuthenticationEntryPoint;
     this.customBearerTokenAuthenticationEntryPoint = customBearerTokenAuthenticationEntryPoint;
     this.customBearerTokenAccessDeniedHandler = customBearerTokenAccessDeniedHandler;
+    this.userRequestAuthorizationManager = userRequestAuthorizationManager;
 
     // Generate a public/private key pair.
     KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance("RSA");
@@ -67,9 +73,10 @@ public class SecurityConfiguration {
             .authorizeHttpRequests(authorizeHttpRequests -> authorizeHttpRequests
               .requestMatchers(HttpMethod.GET, this.baseUrl + "/artifacts/**").permitAll()
               .requestMatchers(HttpMethod.POST, this.baseUrl + "/artifacts/search").permitAll()
-              .requestMatchers(HttpMethod.GET, this.baseUrl + "/users/**").hasAnyAuthority("ROLE_admin")
+              .requestMatchers(HttpMethod.GET, this.baseUrl + "/users").hasAnyAuthority("ROLE_admin")
+              .requestMatchers(HttpMethod.GET, this.baseUrl + "/users/**").access(this.userRequestAuthorizationManager) // The authorization rule is defined in the UserRequestAuthorizationManager.
               .requestMatchers(HttpMethod.POST, this.baseUrl + "/users").hasAnyAuthority("ROLE_admin")
-              .requestMatchers(HttpMethod.PUT, this.baseUrl + "/users/**").hasAnyAuthority("ROLE_admin")
+              .requestMatchers(HttpMethod.PUT, this.baseUrl + "/users/**").access(this.userRequestAuthorizationManager)
               .requestMatchers(HttpMethod.DELETE, this.baseUrl + "/users/**").hasAnyAuthority("ROLE_admin")
               .requestMatchers(EndpointRequest.to("health", "info", "prometheus")).permitAll()
               .requestMatchers(EndpointRequest.toAnyEndpoint().excluding("health", "info", "prometheus")).hasAnyAuthority("ROLE_admin")
