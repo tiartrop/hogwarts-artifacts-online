@@ -19,6 +19,15 @@ spring:
   jpa:
     hibernate:
       ddl-auto: none
+  data:
+    redis:
+      host: ${redis-host} # secret from Cloud Key Vault
+      port: 6380
+      username: ${redis-username} # secret from Cloud Key Vault
+      ssl:
+        enabled: true
+      azure:
+        passwordless-enabled: true
 ai:
   gemini:
     endpoint: ${AI_GENINI_ENDPOINT:https://generativelanguage.googleapis.com/v1beta/openai/chat/completions} # environment variable with a default value
